@@ -21,6 +21,8 @@ interface FormContextType {
 
 const initialFormData: FormData = {
   publicationType: '',
+  title: '',
+  doctorName: '',
   specialty: '',
   location: '',
   clinicName: '',
@@ -44,7 +46,7 @@ export function FormProvider({ children }: { children: ReactNode }) {
   const [result, setResult] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  const totalSteps = 11
+  const totalSteps = 13
 
   const updateField = (field: keyof FormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -197,11 +199,11 @@ Recuerda que no buscamos desinformar ni mentir, sino ayudar genuinamente a trav�
 
 Este post es ${publicationLabel}.
 Datos Iniciales de ti:
+Nombre completo: ${data.title} ${data.doctorName}
 Especialidad: ${data.specialty}
 A quién y a qué los ayudas: ${data.targetAudience}
 Localidad: ${data.location}
 Hospital: ${data.clinicName}
-Localidad: ${data.location}
 Total de pacientes atendidos: ${data.patientCount}
 Datos adicionales:
 ${data.uniqueness}

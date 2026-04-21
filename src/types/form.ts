@@ -2,6 +2,8 @@ export type PublicationType = 'paid_ads' | 'organic' | ''
 
 export interface FormData {
   publicationType: PublicationType
+  title: string
+  doctorName: string
   specialty: string
   location: string
   clinicName: string
