@@ -11,7 +11,8 @@
         function isAllowed(origin) {
           try {
             var h = new URL(origin).hostname;
-            return h === 'raulgomez.com.mx' || h.endsWith('.raulgomez.com.mx');
+            return h === 'raulgomez.com.mx' || h.endsWith('.raulgomez.com.mx') ||
+                   h === 'gohighlevel.com' || h.endsWith('.gohighlevel.com');
           } catch (e) { return false; }
         }
         var allowed = false;
