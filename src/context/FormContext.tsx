@@ -1,9 +1,10 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 import type { FormData } from '../types/form'
-import { saveFormData, loadFormData, getFormDataTimestamp, clearFormData, hasCompletedData } from '../utils/localStorage'
+import { saveFormData, loadFormData, clearFormData, hasCompletedData } from '../utils/localStorage'
 
 interface FormContextType {
   formData: FormData
+  savedFormData: FormData | null
   currentStep: number
   totalSteps: number
   isLoading: boolean
@@ -11,10 +12,6 @@ interface FormContextType {
   isModifying: boolean
   result: string | null
   error: string | null
-  isFieldsLocked: boolean
-  hasSavedData: boolean
-  savedDataTimestamp: string | null
-  showSavedDataModal: boolean
   updateField: (field: keyof FormData, value: string) => void
   nextStep: () => void
   prevStep: () => void
@@ -22,9 +19,6 @@ interface FormContextType {
   submitForm: () => Promise<void>
   modifyResult: (instruction: string) => Promise<void>
   resetForm: () => void
-  useSavedData: () => void
-  startNewForm: () => void
-  unlockFields: () => void
 }
 
 const initialFormData: FormData = {
@@ -47,64 +41,34 @@ const FormContext = createContext<FormContextType | null>(null)
 
 export function FormProvider({ children }: { children: ReactNode }) {
   const [formData, setFormData] = useState<FormData>(initialFormData)
+  const [savedFormData, setSavedFormData] = useState<FormData | null>(null)
   const [currentStep, setCurrentStep] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
   const [loadingStep, setLoadingStep] = useState(0)
   const [isModifying, setIsModifying] = useState(false)
   const [result, setResult] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [isFieldsLocked, setIsFieldsLocked] = useState(false)
-  const [hasSavedData, setHasSavedData] = useState(false)
-  const [savedDataTimestamp, setSavedDataTimestamp] = useState<string | null>(null)
-  const [showSavedDataModal, setShowSavedDataModal] = useState(false)
 
   const totalSteps = 13
 
-  // Check for saved data on mount
+  // Load saved data on mount — pre-populate form and keep reference for inline options
   useEffect(() => {
     const savedData = loadFormData()
-    const timestamp = getFormDataTimestamp()
-
     if (savedData && hasCompletedData(savedData)) {
-      setHasSavedData(true)
-      setSavedDataTimestamp(timestamp)
-      setShowSavedDataModal(true)
+      setFormData(savedData)
+      setSavedFormData(savedData)
     }
   }, [])
 
   // Auto-save form data whenever it changes
   useEffect(() => {
-    if (!isFieldsLocked && formData.publicationType) {
+    if (formData.publicationType) {
       saveFormData(formData)
     }
-  }, [formData, isFieldsLocked])
+  }, [formData])
 
   const updateField = (field: keyof FormData, value: string) => {
-    if (!isFieldsLocked) {
-      setFormData(prev => ({ ...prev, [field]: value }))
-    }
-  }
-
-  const useSavedData = () => {
-    const savedData = loadFormData()
-    if (savedData) {
-      setFormData(savedData)
-      setIsFieldsLocked(true)
-    }
-    setShowSavedDataModal(false)
-    setHasSavedData(false)
-  }
-
-  const startNewForm = () => {
-    clearFormData()
-    setFormData(initialFormData)
-    setIsFieldsLocked(false)
-    setShowSavedDataModal(false)
-    setHasSavedData(false)
-  }
-
-  const unlockFields = () => {
-    setIsFieldsLocked(false)
+    setFormData(prev => ({ ...prev, [field]: value }))
   }
 
   const nextStep = () => {
@@ -152,10 +116,10 @@ export function FormProvider({ children }: { children: ReactNode }) {
   const resetForm = () => {
     setLoadingStep(0)
     setFormData(initialFormData)
+    setSavedFormData(null)
     setCurrentStep(1)
     setResult(null)
     setError(null)
-    setIsFieldsLocked(false)
     clearFormData()
   }
 
@@ -191,6 +155,7 @@ Devuelve únicamente el copy modificado, sin explicaciones adicionales.`
     <FormContext.Provider
       value={{
         formData,
+        savedFormData,
         currentStep,
         totalSteps,
         isLoading,
@@ -198,10 +163,6 @@ Devuelve únicamente el copy modificado, sin explicaciones adicionales.`
         isModifying,
         result,
         error,
-        isFieldsLocked,
-        hasSavedData,
-        savedDataTimestamp,
-        showSavedDataModal,
         updateField,
         nextStep,
         prevStep,
@@ -209,9 +170,6 @@ Devuelve únicamente el copy modificado, sin explicaciones adicionales.`
         submitForm,
         modifyResult,
         resetForm,
-        useSavedData,
-        startNewForm,
-        unlockFields,
       }}
     >
       {children}
