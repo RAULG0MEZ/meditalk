@@ -1,15 +1,41 @@
 import { useForm } from '../context/FormContext'
 
+const LOADING_STEPS = [
+  '',
+  'Generando el copy base...',
+  'Agregando referencias y credibilidad...',
+  'Adaptando al lenguaje coloquial...',
+  'Aplicando formato final...',
+]
+
 export function ResultView() {
-  const { result, error, resetForm, isLoading } = useForm()
+  const { result, error, resetForm, isLoading, loadingStep } = useForm()
 
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center gap-6 py-20">
         <div className="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
         <div className="text-center">
-          <p className="text-lg font-semibold text-slate-700">Generando tu diálogo persuasivo...</p>
-          <p className="text-sm text-slate-400 mt-1">Esto puede tomar unos segundos</p>
+          <p className="text-lg font-semibold text-slate-700">
+            {LOADING_STEPS[loadingStep] || 'Procesando...'}
+          </p>
+          <p className="text-sm text-slate-400 mt-1">
+            Paso {loadingStep} de 4
+          </p>
+        </div>
+        <div className="flex gap-2">
+          {[1, 2, 3, 4].map(step => (
+            <div
+              key={step}
+              className={`h-2 w-10 rounded-full transition-colors duration-300 ${
+                step < loadingStep
+                  ? 'bg-indigo-600'
+                  : step === loadingStep
+                    ? 'bg-indigo-400 animate-pulse'
+                    : 'bg-slate-200'
+              }`}
+            />
+          ))}
         </div>
       </div>
     )

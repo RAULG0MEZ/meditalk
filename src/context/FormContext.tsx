@@ -6,6 +6,7 @@ interface FormContextType {
   currentStep: number
   totalSteps: number
   isLoading: boolean
+  loadingStep: number
   result: string | null
   error: string | null
   updateField: (field: keyof FormData, value: string) => void
@@ -36,6 +37,7 @@ export function FormProvider({ children }: { children: ReactNode }) {
   const [formData, setFormData] = useState<FormData>(initialFormData)
   const [currentStep, setCurrentStep] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
+  const [loadingStep, setLoadingStep] = useState(0)
   const [result, setResult] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -59,44 +61,36 @@ export function FormProvider({ children }: { children: ReactNode }) {
 
   const submitForm = async () => {
     setIsLoading(true)
+    setLoadingStep(0)
     setError(null)
 
     try {
       const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY
       if (!apiKey) throw new Error('Falta la clave de API de Anthropic (VITE_ANTHROPIC_API_KEY)')
 
-      const prompt = buildPrompt(formData)
+      setLoadingStep(1)
+      const copy = await callAnthropic(apiKey, buildPrompt(formData))
 
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-access': 'true',
-        },
-        body: JSON.stringify({
-          model: 'claude-haiku-4-5-20251001',
-          max_tokens: 2048,
-          messages: [{ role: 'user', content: prompt }],
-        }),
-      })
+      setLoadingStep(2)
+      const withCredibility = await callAnthropic(apiKey, buildCredibilityPrompt(copy, formData.targetAudience))
 
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}))
-        throw new Error(errData?.error?.message || `Error ${response.status}`)
-      }
+      setLoadingStep(3)
+      const colloquial = await callAnthropic(apiKey, buildColloquialPrompt(withCredibility))
 
-      const data = await response.json()
-      setResult(data.content[0].text)
+      setLoadingStep(4)
+      const formatted = await callAnthropic(apiKey, buildFormatPrompt(colloquial))
+
+      setResult(formatted)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ocurrió un error inesperado')
     } finally {
       setIsLoading(false)
+      setLoadingStep(0)
     }
   }
 
   const resetForm = () => {
+    setLoadingStep(0)
     setFormData(initialFormData)
     setCurrentStep(1)
     setResult(null)
@@ -110,6 +104,7 @@ export function FormProvider({ children }: { children: ReactNode }) {
         currentStep,
         totalSteps,
         isLoading,
+        loadingStep,
         result,
         error,
         updateField,
@@ -129,6 +124,31 @@ export function useForm() {
   const ctx = useContext(FormContext)
   if (!ctx) throw new Error('useForm must be used inside FormProvider')
   return ctx
+}
+
+async function callAnthropic(apiKey: string, prompt: string): Promise<string> {
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true',
+    },
+    body: JSON.stringify({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 4096,
+      messages: [{ role: 'user', content: prompt }],
+    }),
+  })
+
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}))
+    throw new Error((errData as { error?: { message?: string } })?.error?.message || `Error ${response.status}`)
+  }
+
+  const data = await response.json() as { content: { text: string }[] }
+  return data.content[0].text
 }
 
 function buildPrompt(data: FormData): string {
@@ -262,4 +282,88 @@ No queremos copias ni mensajes genéricos.
 Tiene que ser super específico el dolor, NO puedes generalizar.
 Tiene que iniciar con un rompe patrón RELEVANTE que conecte con los dolores del cliente ideal.
 Escribe tal cual como habla un humano en vivo con las expresiones necesarias.`
+}
+
+function buildCredibilityPrompt(previousCopy: string, targetAudience: string): string {
+  return `Te voy a compartir un texto y tu trabajo será únicamente agregar elementos al copy que le den validez real y credibilidad al espectador según su identidad o perfil, sin modificar los elementos claves que ya vienen agregados.
+
+Es importante que los elementos que agregues sean altamente relevantes y familiares para la audiencia a la dirigida (${targetAudience}). Prioriza referencias mainstream, de fácil reconocimiento, familiaridad y que formen parte de la vida cotidiana del público al que va dirigido el mensaje (NO del narrador).
+
+Evita referencias de nicho o elementos demasiado técnicos o específicos que el público no reconocerá. Tienes que entender el nivel de conciencia probable que tendría la audiencia y elegir los elementos que sean relevantes y familiares al contexto como de la situación.
+
+Tipos de elementos a elegir:
+Marcas de productos conocidos
+Localidades conocidas
+Títulos de libros populares
+Artistas relevantes
+Noticias actuales
+Artículos o estudios relevantes
+Frases célebres
+Películas o series populares
+Platillos de comida reconocidos
+Herramientas digitales o físicas comunes
+Personajes famosos o históricos
+Actividades comunes o hábitos diarios (buenos o malos)
+Métodos y técnicas reconocidas
+Juegos o videojuegos populares
+Objetos cotidianos o simbólicos
+Aspectos de la cultura popular
+Estilos de música conocidos
+Rituales o prácticas conocidas
+Eventos culturales o históricos relevantes
+No modifiques la redacción, intención o narrativa original del texto. Tu tarea es identificar oportunidades específicas para anclar estos elementos y generar mayor identificación, familiaridad y confianza con el público meta.
+
+Si el copy menciona medicinas, especificas con marcas o cuáles medicinas. Si mencionas que las dietas no funcionan, mencionas el nombre de las dietas que no funcionan. Y así sucesivamente, la intención es darle validez a la información que se comparte.
+
+OJO: No uses referencias difíciles de otra lengua que NO sea ESPAÑOL o de otras culturas. Actualmente es LATINOAMERICANO.
+
+Si mencionamos que existe un problema actual en la sociedad, mencionas algo sobre un artículo y su fuente (Solo si es relevante).
+
+Según el contenido que te comparto, deberás elegir aquellos elementos que sean los más congruentes o importantes a detallar o agregar para generar validez y veracidad al lector.
+
+No asumas que el lector es una persona sofisticada o que ya tiene conocimientos avanzados sobre el tema. Es importante elegir los elementos con sentido común, asegurándote de que sean reconocidos y generen familiaridad.
+
+OJO: No alargues demasiado el copy porque actualmente ya está extenso.
+
+Este es el copy completo, envíamelo con las modificaciones especificadas anteriormente:
+
+${previousCopy}`
+}
+
+function buildColloquialPrompt(previousCopy: string): string {
+  return `Te voy a compartir un texto y tu trabajo será únicamente usar un lenguaje más coloquial mexicano pero sin sonar naco o grosero pero adaptado a la identidad de la audiencia a la que vamos dirigida. Tienes que además agregar jergas o modismos que den un sentido de familiaridad al público objetivo.
+
+Tienes prohibido modificar la redacción o la intención de la narrativa, simplemente convertirás el lenguaje en el que está narrado.
+
+Imagínate que estás hablando con un público frente a ti entonces escribe de la misma forma como si hablaras, el mismo mensaje en su escritura tiene que transmitir por su redacción la emoción y tonalidad mediante los símbolos o la mala ortografía escrita a propósito. Utiliza expresiones coloquiales (ejemplos: Uff, híjole, tssss, caray, vaya!, qué cosa?, anda!, qué sorpresa, mira nada más, no puede ser!, qué maravilla, ah, qué bien!, qué interesante?, no me digas!, válgame Dios!, fíjate nada más, madre mía!, ándale pues, increíble!, qué curioso, vaya sorpresa!, qué detalle!, qué emoción!, quién lo diría?, esto sí que no me lo esperaba, por Dios!, qué alegría!, qué bárbaro!, en serio?, no lo puedo creer!, pero qué bien, vaya que sí!, sin palabras!, qué momento!, qué locura!, madre santa!, santo cielo!, qué impresión!, qué regalo para los ojos!, wow!, de no creerse!, tremendo!, esto me vuela la cabeza!, ah, caramba!, fíjate qué cosa!, mira tú, quién lo iba a decir?, ni en mis mejores sueños!, vaya que sí!, tsss, qué fuerte!, de película!, qué sorpresón!, oye, pues sí que la vida sorprende!, increíble, qué espectáculo!, madre mía, qué maravilla!, esto sí que no me lo veía venir!, no cabe duda!, vaya, qué dicha!).
+
+La única grosería que podrías decir es "fregada" pero no te pido que la uses, solo si es que el texto lo amerita.
+
+También tu trabajo será transmitir el mensaje con un lenguaje extremadamente sencillo, si logras detectar elementos que un joven de 12 años promedio no podría entender, entonces lo explicas de una forma que se entienda, pero solo en las partes necesarias ya que NO puedes modificar su redacción, solo aquellas frases, palabras, ideas, con dificultad media alta que el público a leída rápida no podría comprender por un alto procesamiento mental.
+
+Este es el texto a modificar:
+
+${previousCopy}`
+}
+
+function buildFormatPrompt(previousCopy: string): string {
+  return `Te voy a proporcionar un texto, y tu tarea será corregirlo en el formato que lo deseo y devolverlo con un renglón de espacio (una línea en blanco) entre cada bloque de texto o párrafo. No escribas explicaciones ni texto adicional, solo devuelve el texto formateado.
+
+Instrucciones específicas:
+
+Si detectas renglones o párrafos muy largos, reescríbelos de manera más concisa o reorganízalos para que la lectura sea compacta y fluida.
+
+Si detectas más de 2 enunciados por renglón, sepáralos: 1 enunciado, después un renglón de espacio, luego colocas el siguiente enunciado en el siguiente renglón. Con esto me refiero que si en un renglón hay un enunciado que termina tanto con (.) punto o (,), (¿?) (¡!) signos de exclamación o interrogación, lo separas al siguiente renglón con uno de espacio.
+
+Cada renglón debe terminar forzosamente con un símbolo, ya sea elipsis (...), coma (,), o punto final (.).
+
+Agrega un renglón de espacio (línea en blanco) entre cada bloque de texto.
+
+Y por último, la primera letra de la primera palabra de cada renglón siempre deberá ser mayúscula.
+
+En el caso de detectar emojis, bórralos. Y si por ejemplo hay una lista en donde usan emojis, reemplázalos por guiones (-) o números según el contexto.
+
+De acuerdo, este es el texto a modificar, haz esas modificaciones en las partes que aplican y regresa únicamente con la respuesta:
+
+${previousCopy}`
 }
