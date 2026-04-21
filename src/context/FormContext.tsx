@@ -7,6 +7,7 @@ interface FormContextType {
   totalSteps: number
   isLoading: boolean
   loadingStep: number
+  isModifying: boolean
   result: string | null
   error: string | null
   updateField: (field: keyof FormData, value: string) => void
@@ -14,6 +15,7 @@ interface FormContextType {
   prevStep: () => void
   goToStep: (step: number) => void
   submitForm: () => Promise<void>
+  modifyResult: (instruction: string) => Promise<void>
   resetForm: () => void
 }
 
@@ -38,6 +40,7 @@ export function FormProvider({ children }: { children: ReactNode }) {
   const [currentStep, setCurrentStep] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
   const [loadingStep, setLoadingStep] = useState(0)
+  const [isModifying, setIsModifying] = useState(false)
   const [result, setResult] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -97,6 +100,34 @@ export function FormProvider({ children }: { children: ReactNode }) {
     setError(null)
   }
 
+  const modifyResult = async (instruction: string) => {
+    if (!result) return
+    setIsModifying(true)
+    setError(null)
+
+    try {
+      const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY
+      if (!apiKey) throw new Error('Falta la clave de API de Anthropic (VITE_ANTHROPIC_API_KEY)')
+
+      const prompt = `Te comparto un copy ya terminado y una instrucción de modificación. Tu tarea es aplicar únicamente los cambios solicitados sin alterar el formato, la estructura, el estilo coloquial, ni el tono del resto del texto. Mantén los renglones cortos, el espaciado entre líneas y todas las reglas de formato que ya tiene el copy.
+
+Copy actual:
+${result}
+
+Instrucción de modificación:
+${instruction}
+
+Devuelve únicamente el copy modificado, sin explicaciones adicionales.`
+
+      const modified = await callAnthropic(apiKey, prompt)
+      setResult(modified)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Ocurrió un error inesperado')
+    } finally {
+      setIsModifying(false)
+    }
+  }
+
   return (
     <FormContext.Provider
       value={{
@@ -105,6 +136,7 @@ export function FormProvider({ children }: { children: ReactNode }) {
         totalSteps,
         isLoading,
         loadingStep,
+        isModifying,
         result,
         error,
         updateField,
@@ -112,6 +144,7 @@ export function FormProvider({ children }: { children: ReactNode }) {
         prevStep,
         goToStep,
         submitForm,
+        modifyResult,
         resetForm,
       }}
     >
