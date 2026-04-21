@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useForm } from '../context/FormContext'
 
 const LOADING_STEPS = [
@@ -9,7 +10,16 @@ const LOADING_STEPS = [
 ]
 
 export function ResultView() {
-  const { result, error, resetForm, isLoading, loadingStep } = useForm()
+  const { result, error, resetForm, isLoading, loadingStep, isModifying, modifyResult } = useForm()
+  const [showModal, setShowModal] = useState(false)
+  const [instruction, setInstruction] = useState('')
+
+  const handleModify = async () => {
+    if (!instruction.trim()) return
+    setShowModal(false)
+    await modifyResult(instruction.trim())
+    setInstruction('')
+  }
 
   if (isLoading) {
     return (
@@ -19,9 +29,7 @@ export function ResultView() {
           <p className="text-lg font-semibold text-slate-700">
             {LOADING_STEPS[loadingStep] || 'Procesando...'}
           </p>
-          <p className="text-sm text-slate-400 mt-1">
-            Paso {loadingStep} de 4
-          </p>
+          <p className="text-sm text-slate-400 mt-1">Paso {loadingStep} de 4</p>
         </div>
         <div className="flex gap-2">
           {[1, 2, 3, 4].map(step => (
@@ -64,37 +72,94 @@ export function ResultView() {
   if (!result) return null
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center text-xl">
-          ✅
+    <>
+      <div className="flex flex-col gap-6 pb-24">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center text-xl">
+            ✅
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-slate-800">¡Tu copy está listo!</h2>
+            <p className="text-sm text-slate-500">Copia el texto y úsalo en tu contenido</p>
+          </div>
         </div>
-        <div>
-          <h2 className="text-xl font-bold text-slate-800">¡Tu diálogo está listo!</h2>
-          <p className="text-sm text-slate-500">Copia el texto y úsalo en tu contenido</p>
+
+        <div className="bg-white border-2 border-slate-200 rounded-2xl p-6 relative">
+          {isModifying && (
+            <div className="absolute inset-0 bg-white/80 rounded-2xl flex items-center justify-center z-10">
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+                <p className="text-sm font-medium text-slate-600">Aplicando cambios...</p>
+              </div>
+            </div>
+          )}
+          <pre className="whitespace-pre-wrap text-slate-700 text-sm leading-relaxed font-sans">
+            {result}
+          </pre>
+          <button
+            onClick={() => navigator.clipboard.writeText(result)}
+            className="absolute top-4 right-4 px-3 py-1.5 text-xs font-medium bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg transition-colors"
+          >
+            Copiar
+          </button>
         </div>
       </div>
 
-      <div className="bg-white border-2 border-slate-200 rounded-2xl p-6 relative">
-        <pre className="whitespace-pre-wrap text-slate-700 text-sm leading-relaxed font-sans">
-          {result}
-        </pre>
+      {/* Botones flotantes */}
+      <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-20">
         <button
-          onClick={() => navigator.clipboard.writeText(result)}
-          className="absolute top-4 right-4 px-3 py-1.5 text-xs font-medium bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg transition-colors"
+          onClick={() => setShowModal(true)}
+          disabled={isModifying}
+          title="Modificar copy"
+          className="w-14 h-14 rounded-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white shadow-lg flex items-center justify-center transition-colors"
         >
-          Copiar
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
         </button>
-      </div>
-
-      <div className="flex gap-3 flex-wrap">
         <button
           onClick={resetForm}
-          className="px-6 py-2.5 border-2 border-slate-200 text-slate-600 rounded-xl font-semibold hover:bg-slate-100 transition-colors"
+          disabled={isModifying}
+          title="Empezar de nuevo"
+          className="w-14 h-14 rounded-full bg-white hover:bg-slate-50 disabled:opacity-50 text-slate-600 border-2 border-slate-200 shadow-lg flex items-center justify-center transition-colors"
         >
-          Crear nuevo diálogo
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
         </button>
       </div>
-    </div>
+
+      {/* Modal de modificación */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-30 p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 flex flex-col gap-4">
+            <h3 className="text-lg font-bold text-slate-800">¿Qué te gustaría modificar?</h3>
+            <p className="text-sm text-slate-500">Describe los cambios que quieres aplicar al copy. El formato y la estructura se mantendrán.</p>
+            <textarea
+              value={instruction}
+              onChange={e => setInstruction(e.target.value)}
+              placeholder="Ej. Cambia el tono para que sea más urgente al final, o agrega más énfasis en la oferta..."
+              rows={4}
+              className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-700 placeholder-slate-400 resize-none focus:outline-none focus:border-indigo-400"
+            />
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => { setShowModal(false); setInstruction('') }}
+                className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleModify}
+                disabled={!instruction.trim()}
+                className="px-5 py-2 text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl transition-colors"
+              >
+                Aplicar cambios
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
