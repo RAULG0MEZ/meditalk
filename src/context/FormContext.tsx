@@ -1,5 +1,6 @@
-import { createContext, useContext, useState, type ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 import type { FormData } from '../types/form'
+import { saveFormData, loadFormData, getFormDataTimestamp, clearFormData, hasCompletedData } from '../utils/localStorage'
 
 interface FormContextType {
   formData: FormData
@@ -10,6 +11,10 @@ interface FormContextType {
   isModifying: boolean
   result: string | null
   error: string | null
+  isFieldsLocked: boolean
+  hasSavedData: boolean
+  savedDataTimestamp: string | null
+  showSavedDataModal: boolean
   updateField: (field: keyof FormData, value: string) => void
   nextStep: () => void
   prevStep: () => void
@@ -17,6 +22,9 @@ interface FormContextType {
   submitForm: () => Promise<void>
   modifyResult: (instruction: string) => Promise<void>
   resetForm: () => void
+  useSavedData: () => void
+  startNewForm: () => void
+  unlockFields: () => void
 }
 
 const initialFormData: FormData = {
@@ -45,11 +53,58 @@ export function FormProvider({ children }: { children: ReactNode }) {
   const [isModifying, setIsModifying] = useState(false)
   const [result, setResult] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [isFieldsLocked, setIsFieldsLocked] = useState(false)
+  const [hasSavedData, setHasSavedData] = useState(false)
+  const [savedDataTimestamp, setSavedDataTimestamp] = useState<string | null>(null)
+  const [showSavedDataModal, setShowSavedDataModal] = useState(false)
 
   const totalSteps = 13
 
+  // Check for saved data on mount
+  useEffect(() => {
+    const savedData = loadFormData()
+    const timestamp = getFormDataTimestamp()
+
+    if (savedData && hasCompletedData(savedData)) {
+      setHasSavedData(true)
+      setSavedDataTimestamp(timestamp)
+      setShowSavedDataModal(true)
+    }
+  }, [])
+
+  // Auto-save form data whenever it changes
+  useEffect(() => {
+    if (!isFieldsLocked && formData.publicationType) {
+      saveFormData(formData)
+    }
+  }, [formData, isFieldsLocked])
+
   const updateField = (field: keyof FormData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
+    if (!isFieldsLocked) {
+      setFormData(prev => ({ ...prev, [field]: value }))
+    }
+  }
+
+  const useSavedData = () => {
+    const savedData = loadFormData()
+    if (savedData) {
+      setFormData(savedData)
+      setIsFieldsLocked(true)
+    }
+    setShowSavedDataModal(false)
+    setHasSavedData(false)
+  }
+
+  const startNewForm = () => {
+    clearFormData()
+    setFormData(initialFormData)
+    setIsFieldsLocked(false)
+    setShowSavedDataModal(false)
+    setHasSavedData(false)
+  }
+
+  const unlockFields = () => {
+    setIsFieldsLocked(false)
   }
 
   const nextStep = () => {
@@ -100,6 +155,8 @@ export function FormProvider({ children }: { children: ReactNode }) {
     setCurrentStep(1)
     setResult(null)
     setError(null)
+    setIsFieldsLocked(false)
+    clearFormData()
   }
 
   const modifyResult = async (instruction: string) => {
@@ -141,6 +198,10 @@ Devuelve únicamente el copy modificado, sin explicaciones adicionales.`
         isModifying,
         result,
         error,
+        isFieldsLocked,
+        hasSavedData,
+        savedDataTimestamp,
+        showSavedDataModal,
         updateField,
         nextStep,
         prevStep,
@@ -148,6 +209,9 @@ Devuelve únicamente el copy modificado, sin explicaciones adicionales.`
         submitForm,
         modifyResult,
         resetForm,
+        useSavedData,
+        startNewForm,
+        unlockFields,
       }}
     >
       {children}
