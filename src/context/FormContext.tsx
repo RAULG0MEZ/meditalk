@@ -76,7 +76,7 @@ export function FormProvider({ children }: { children: ReactNode }) {
           'anthropic-dangerous-direct-browser-access': 'true',
         },
         body: JSON.stringify({
-          model: 'claude-opus-4-7',
+          model: 'claude-haiku-4-5-20251001',
           max_tokens: 2048,
           messages: [{ role: 'user', content: prompt }],
         }),
