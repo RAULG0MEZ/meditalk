@@ -13,15 +13,15 @@
             var h = new URL(origin).hostname;
             return h === 'raulgomez.com.mx' || h.endsWith('.raulgomez.com.mx') ||
                    h === 'gohighlevel.com' || h.endsWith('.gohighlevel.com');
-          } catch (e) { return false; }
+          } catch (e) { return true; }
         }
-        var allowed = false;
+        var blocked = false;
         if (window.location.ancestorOrigins && window.location.ancestorOrigins.length) {
-          allowed = Array.from(window.location.ancestorOrigins).every(isAllowed);
+          blocked = !Array.from(window.location.ancestorOrigins).every(isAllowed);
         } else if (document.referrer) {
-          allowed = isAllowed(document.referrer);
+          blocked = !isAllowed(document.referrer);
         }
-        if (!allowed) {
+        if (blocked) {
           document.documentElement.innerHTML =
             '<body style="margin:0;display:flex;align-items:center;justify-content:center;' +
             'height:100vh;font-family:sans-serif;background:#f8fafc;">' +
