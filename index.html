@@ -8,14 +8,17 @@
     <script>
       (function () {
         if (window.self === window.top) return;
-        var ALLOWED = ['raulgomez.com.mx', 'www.raulgomez.com.mx'];
+        function isAllowed(origin) {
+          try {
+            var h = new URL(origin).hostname;
+            return h === 'raulgomez.com.mx' || h.endsWith('.raulgomez.com.mx');
+          } catch (e) { return false; }
+        }
         var allowed = false;
         if (window.location.ancestorOrigins && window.location.ancestorOrigins.length) {
-          allowed = Array.from(window.location.ancestorOrigins).every(function (o) {
-            try { return ALLOWED.indexOf(new URL(o).hostname) !== -1; } catch (e) { return false; }
-          });
+          allowed = Array.from(window.location.ancestorOrigins).every(isAllowed);
         } else if (document.referrer) {
-          try { allowed = ALLOWED.indexOf(new URL(document.referrer).hostname) !== -1; } catch (e) {}
+          allowed = isAllowed(document.referrer);
         }
         if (!allowed) {
           document.documentElement.innerHTML =
