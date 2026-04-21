@@ -25,6 +25,11 @@ export function FormStep({ step }: FormStepProps) {
   return (
     <div className="flex flex-col gap-6 animate-fade-in">
       <div>
+        {step.important && (
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-1.5 inline-block">
+            Pregunta más importante — descríbela con el mayor detalle posible
+          </p>
+        )}
         <h2 className="text-2xl font-bold text-slate-800 leading-snug">
           {step.question}
           {step.optional && (

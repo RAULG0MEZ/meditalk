@@ -51,6 +51,7 @@ export const STEPS: Step[] = [
     field: 'location',
     type: 'text',
     placeholder: 'Ej. Ciudad de México, Guadalajara, Monterrey...',
+    optional: true,
   },
   {
     id: 6,
@@ -62,10 +63,11 @@ export const STEPS: Step[] = [
   },
   {
     id: 7,
-    question: '¿A quién ayudas y qué problema o condición deseas tratar en tus pacientes?',
+    question: '¿A quién ayudas y qué problema deseas tratar en tus pacientes?',
     field: 'targetAudience',
     type: 'textarea',
-    placeholder: 'Ej. Adultos mayores con hipertensión y problemas cardíacos...',
+    placeholder: 'Describe con detalle: edad, género, condición específica, síntomas, miedos, situación de vida... Ej. Mujeres de 35-55 años con sobrepeso que han probado dietas sin resultado y sienten vergüenza de su cuerpo...',
+    important: true,
   },
   {
     id: 8,
@@ -80,6 +82,7 @@ export const STEPS: Step[] = [
     field: 'uniqueMethod',
     type: 'textarea',
     placeholder: 'Ej. Protocolo propio de rehabilitación, técnica mínimamente invasiva...',
+    optional: true,
   },
   {
     id: 10,
@@ -94,6 +97,7 @@ export const STEPS: Step[] = [
     field: 'awardsTestimonials',
     type: 'textarea',
     placeholder: 'Ej. Premio Nacional de Medicina 2022, "El Dr. me cambió la vida" - Juan P...',
+    optional: true,
   },
   {
     id: 12,
@@ -108,5 +112,6 @@ export const STEPS: Step[] = [
     field: 'urgencyReason',
     type: 'textarea',
     placeholder: 'Ej. Solo 10 lugares disponibles este mes, promoción válida hasta el viernes...',
+    optional: true,
   },
 ]

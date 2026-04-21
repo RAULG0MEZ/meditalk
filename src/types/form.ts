@@ -23,5 +23,6 @@ export interface Step {
   type: 'radio' | 'text' | 'textarea'
   placeholder?: string
   optional?: boolean
+  important?: boolean
   options?: { value: string; label: string; description?: string }[]
 }
