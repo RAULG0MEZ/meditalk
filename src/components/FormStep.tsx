@@ -173,6 +173,14 @@ export function FormStep({ step }: FormStepProps) {
         >
           {isLast ? 'Generar diálogo →' : 'Continuar →'}
         </button>
+        {step.optional && !isLast && (
+          <button
+            onClick={() => { updateField(step.field, ''); nextStep() }}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 border-slate-200 text-slate-400 font-medium hover:bg-slate-50 hover:text-slate-500 transition-colors"
+          >
+            Saltar
+          </button>
+        )}
       </div>
 
       {step.type !== 'radio' && !step.optional && value.trim() === '' && (
