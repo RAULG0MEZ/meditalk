@@ -15,7 +15,7 @@ export function Header({ onGoHome }: HeaderProps) {
         </div>
         <div className="text-left">
           <h1 className="text-xl font-bold text-slate-800 leading-none group-hover:text-indigo-700 group-disabled:group-hover:text-slate-800 transition-colors">MediTalk</h1>
-          <p className="text-xs text-slate-500">Generador de diálogos persuasivos</p>
+          <p className="text-xs text-slate-500">Crea tu publicación para redes sociales</p>
         </div>
       </button>
     </header>

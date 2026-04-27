@@ -24,7 +24,7 @@ export function LandingPage({ onCreateNew, onOpenLibrary }: LandingPageProps) {
           </div>
           <div className="text-center">
             <h1 className="text-3xl font-bold text-slate-800 leading-none">MediTalk</h1>
-            <p className="text-sm text-slate-500 mt-1">Generador de diálogos persuasivos</p>
+            <p className="text-sm text-slate-500 mt-1">Crea tu publicación para redes sociales</p>
           </div>
         </div>
 
@@ -36,8 +36,8 @@ export function LandingPage({ onCreateNew, onOpenLibrary }: LandingPageProps) {
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-lg font-bold">Crear nuevo copy</p>
-                <p className="text-indigo-200 text-sm mt-0.5">Completa el formulario y genera tu contenido</p>
+                <p className="text-lg font-bold">Crear nueva publicación</p>
+                <p className="text-indigo-200 text-sm mt-0.5">Contesta unas preguntas y te generamos tu texto</p>
               </div>
               <div className="w-10 h-10 bg-indigo-500 rounded-xl flex items-center justify-center group-hover:bg-indigo-400 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -53,11 +53,11 @@ export function LandingPage({ onCreateNew, onOpenLibrary }: LandingPageProps) {
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-lg font-bold">Biblioteca de diálogos</p>
+                <p className="text-lg font-bold">Mis publicaciones</p>
                 <p className="text-slate-400 text-sm mt-0.5">
                   {dialogueCount === 0
-                    ? 'Aún no tienes diálogos guardados'
-                    : `${dialogueCount} ${dialogueCount === 1 ? 'diálogo guardado' : 'diálogos guardados'}`}
+                    ? 'Aún no tienes publicaciones guardadas'
+                    : `${dialogueCount} ${dialogueCount === 1 ? 'publicación guardada' : 'publicaciones guardadas'}`}
                 </p>
               </div>
               <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center group-hover:bg-indigo-50 transition-colors">

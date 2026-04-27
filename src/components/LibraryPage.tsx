@@ -56,7 +56,7 @@ export function LibraryPage({ onCreateNew, onOpenDialogue, onGoHome }: LibraryPa
               <div className="w-7 h-7 bg-indigo-600 rounded-lg flex items-center justify-center">
                 <span className="text-white text-sm font-bold">M</span>
               </div>
-              <span className="font-bold text-slate-800">Biblioteca</span>
+              <span className="font-bold text-slate-800">Mis publicaciones</span>
             </div>
           </div>
           <button
@@ -80,13 +80,13 @@ export function LibraryPage({ onCreateNew, onOpenDialogue, onGoHome }: LibraryPa
             </div>
             <div>
               <p className="font-semibold text-slate-700">Biblioteca vacía</p>
-              <p className="text-sm text-slate-400 mt-1">Los copys que generes se guardarán aquí automáticamente</p>
+              <p className="text-sm text-slate-400 mt-1">Las publicaciones que crees se guardarán aquí automáticamente</p>
             </div>
             <button
               onClick={onCreateNew}
               className="mt-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition-colors"
             >
-              Crear mi primer copy
+              Crear mi primera publicación
             </button>
           </div>
         ) : (

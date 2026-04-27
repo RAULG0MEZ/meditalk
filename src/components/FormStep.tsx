@@ -347,7 +347,7 @@ export function FormStep({ step }: FormStepProps) {
             }
           `}
         >
-          {isLast ? 'Generar diálogo →' : 'Continuar →'}
+          {isLast ? 'Crear mi publicación →' : 'Continuar →'}
         </button>
         {step.optional && step.type !== 'yesno' && step.type !== 'method-story' && !isLast && (
           <button

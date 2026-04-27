@@ -3,10 +3,10 @@ import { useForm } from '../context/FormContext'
 
 const LOADING_STEPS = [
   '',
-  'Generando el copy base...',
-  'Agregando referencias y credibilidad...',
-  'Adaptando al lenguaje coloquial...',
-  'Aplicando formato final...',
+  'Creando tu publicación...',
+  'Añadiendo ejemplos y referencias reales...',
+  'Ajustando el lenguaje para que suene natural...',
+  'Dando el toque final...',
 ]
 
 interface ResultViewProps {
@@ -84,11 +84,11 @@ export function ResultView({ onGoToLibrary }: ResultViewProps) {
               ✅
             </div>
             <div>
-              <h2 className="text-xl font-bold text-slate-800">¡Tu copy está listo!</h2>
+              <h2 className="text-xl font-bold text-slate-800">¡Tu publicación está lista!</h2>
               <p className="text-sm text-slate-500">
                 {currentDialogueId
-                  ? 'Guardado en biblioteca'
-                  : 'Copia el texto y úsalo en tu contenido'}
+                  ? 'Guardada en Mis publicaciones'
+                  : 'Cópiala y publícala en tus redes'}
               </p>
             </div>
           </div>
@@ -99,7 +99,7 @@ export function ResultView({ onGoToLibrary }: ResultViewProps) {
             <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
             </svg>
-            Biblioteca
+            Mis publicaciones
           </button>
         </div>
 
@@ -129,7 +129,7 @@ export function ResultView({ onGoToLibrary }: ResultViewProps) {
         <button
           onClick={() => setShowModal(true)}
           disabled={isModifying}
-          title="Modificar copy"
+          title="Editar publicación"
           className="w-14 h-14 rounded-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white shadow-lg flex items-center justify-center transition-colors"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -152,12 +152,12 @@ export function ResultView({ onGoToLibrary }: ResultViewProps) {
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-30 p-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 flex flex-col gap-4">
-            <h3 className="text-lg font-bold text-slate-800">¿Qué te gustaría modificar?</h3>
-            <p className="text-sm text-slate-500">Describe los cambios que quieres aplicar al copy. El formato y la estructura se mantendrán.</p>
+            <h3 className="text-lg font-bold text-slate-800">¿Qué le quieres cambiar?</h3>
+            <p className="text-sm text-slate-500">Dile qué quieres ajustar. El formato y el estilo del texto se van a mantener igual.</p>
             <textarea
               value={instruction}
               onChange={e => setInstruction(e.target.value)}
-              placeholder="Ej. Cambia el tono para que sea más urgente al final, o agrega más énfasis en la oferta..."
+              placeholder="Ej. Ponlo más urgente al final, agrega más énfasis en lo que estoy ofreciendo, hazlo más corto..."
               rows={4}
               className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-700 placeholder-slate-400 resize-none focus:outline-none focus:border-indigo-400"
             />
@@ -173,7 +173,7 @@ export function ResultView({ onGoToLibrary }: ResultViewProps) {
                 disabled={!instruction.trim()}
                 className="px-5 py-2 text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl transition-colors"
               >
-                Aplicar cambios
+                Aplicar
               </button>
             </div>
           </div>
