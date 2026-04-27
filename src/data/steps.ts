@@ -75,14 +75,14 @@ export const STEPS: Step[] = [
     field: 'uniqueness',
     type: 'textarea',
     placeholder: 'Ej. 15 años de experiencia, enfoque integral, atención personalizada...',
+    optional: true,
   },
   {
     id: 9,
     question: '¿Tienes algún método o tratamiento único?',
     field: 'uniqueMethod',
-    type: 'textarea',
+    type: 'yesno',
     placeholder: 'Ej. Protocolo propio de rehabilitación, técnica mínimamente invasiva...',
-    optional: true,
   },
   {
     id: 10,
@@ -90,14 +90,14 @@ export const STEPS: Step[] = [
     field: 'patientCount',
     type: 'text',
     placeholder: 'Ej. Más de 500 pacientes, 1,200 consultas...',
+    optional: true,
   },
   {
     id: 11,
     question: '¿Tienes premios o testimonios?',
     field: 'awardsTestimonials',
-    type: 'textarea',
+    type: 'yesno',
     placeholder: 'Ej. Premio Nacional de Medicina 2022, "El Dr. me cambió la vida" - Juan P...',
-    optional: true,
   },
   {
     id: 12,
@@ -110,8 +110,7 @@ export const STEPS: Step[] = [
     id: 13,
     question: '¿Por qué esta oferta es ahora?',
     field: 'urgencyReason',
-    type: 'textarea',
+    type: 'yesno',
     placeholder: 'Ej. Solo 10 lugares disponibles este mes, promoción válida hasta el viernes...',
-    optional: true,
   },
 ]
