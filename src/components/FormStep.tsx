@@ -19,15 +19,38 @@ export function FormStep({ step }: FormStepProps) {
     step.type === 'yesno' && value.trim() !== '' ? 'si' : null
   )
 
+  const [methodStoryChoice, setMethodStoryChoice] = useState<'method' | 'story' | 'no' | null>(
+    step.type === 'method-story'
+      ? value.startsWith('MÉTODO:') ? 'method'
+        : value.startsWith('HISTORIA:') ? 'story'
+        : null
+      : null
+  )
+
   useEffect(() => {
     if (step.type === 'yesno') {
       setYesNoChoice(value.trim() !== '' ? 'si' : null)
     }
+    if (step.type === 'method-story') {
+      setMethodStoryChoice(
+        value.startsWith('MÉTODO:') ? 'method'
+          : value.startsWith('HISTORIA:') ? 'story'
+          : null
+      )
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step.id])
 
+  const methodStoryText = value.startsWith('MÉTODO:')
+    ? value.slice('MÉTODO:'.length).trimStart()
+    : value.startsWith('HISTORIA:')
+    ? value.slice('HISTORIA:'.length).trimStart()
+    : value
+
   const canProceed = step.type === 'yesno'
     ? (yesNoChoice === 'no' || (yesNoChoice === 'si' && value.trim() !== ''))
+    : step.type === 'method-story'
+    ? (methodStoryChoice === 'no' || (methodStoryChoice !== null && methodStoryText.trim() !== ''))
     : step.optional ? true : value.trim() !== ''
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement | HTMLInputElement>) => {
@@ -218,6 +241,92 @@ export function FormStep({ step }: FormStepProps) {
         </div>
       )}
 
+      {step.type === 'method-story' && (
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-3">
+            <label
+              className={`flex items-start gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                methodStoryChoice === 'method'
+                  ? 'border-indigo-500 bg-indigo-50'
+                  : 'border-slate-200 hover:border-indigo-200 bg-white'
+              }`}
+            >
+              <input
+                type="radio"
+                name={`${step.field}_choice`}
+                checked={methodStoryChoice === 'method'}
+                onChange={() => {
+                  if (methodStoryChoice !== 'method') updateField(step.field, '')
+                  setMethodStoryChoice('method')
+                }}
+                className="mt-1 accent-indigo-600 w-4 h-4 shrink-0"
+              />
+              <div>
+                <p className="font-semibold text-slate-800">Sí, tengo un método o tratamiento único</p>
+                <p className="text-sm text-slate-500 mt-0.5">Describe tu enfoque propio para destacar tu propuesta de valor</p>
+              </div>
+            </label>
+            <label
+              className={`flex items-start gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                methodStoryChoice === 'story'
+                  ? 'border-indigo-500 bg-indigo-50'
+                  : 'border-slate-200 hover:border-indigo-200 bg-white'
+              }`}
+            >
+              <input
+                type="radio"
+                name={`${step.field}_choice`}
+                checked={methodStoryChoice === 'story'}
+                onChange={() => {
+                  if (methodStoryChoice !== 'story') updateField(step.field, '')
+                  setMethodStoryChoice('story')
+                }}
+                className="mt-1 accent-indigo-600 w-4 h-4 shrink-0"
+              />
+              <div>
+                <p className="font-semibold text-slate-800">Quiero contar mi historia (Viaje del Héroe)</p>
+                <p className="text-sm text-slate-500 mt-0.5">El recorrido que te llevó a ser quien eres hoy</p>
+              </div>
+            </label>
+            <label
+              className={`flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                methodStoryChoice === 'no'
+                  ? 'border-slate-400 bg-slate-50'
+                  : 'border-slate-200 hover:border-slate-300 bg-white'
+              }`}
+            >
+              <input
+                type="radio"
+                name={`${step.field}_choice`}
+                checked={methodStoryChoice === 'no'}
+                onChange={() => { setMethodStoryChoice('no'); updateField(step.field, '') }}
+                className="accent-slate-500 w-4 h-4"
+              />
+              <span className="font-semibold text-slate-800">No</span>
+            </label>
+          </div>
+          {(methodStoryChoice === 'method' || methodStoryChoice === 'story') && (
+            <textarea
+              value={methodStoryText}
+              onChange={e =>
+                updateField(
+                  step.field,
+                  (methodStoryChoice === 'method' ? 'MÉTODO: ' : 'HISTORIA: ') + e.target.value
+                )
+              }
+              placeholder={
+                methodStoryChoice === 'method'
+                  ? step.placeholder
+                  : 'Ej. Después de sufrir yo mismo de [condición], entendí que los tratamientos convencionales no bastaban. Estudié durante años, llegué a un punto de quiebre cuando... y hoy ayudo a mis pacientes desde esa experiencia real.'
+              }
+              autoFocus
+              rows={5}
+              className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-indigo-500 focus:outline-none text-slate-800 placeholder-slate-400 text-base transition-colors resize-none"
+            />
+          )}
+        </div>
+      )}
+
       <div className="flex gap-3 pt-2">
         {!isFirst && (
           <button
@@ -240,7 +349,7 @@ export function FormStep({ step }: FormStepProps) {
         >
           {isLast ? 'Generar diálogo →' : 'Continuar →'}
         </button>
-        {step.optional && step.type !== 'yesno' && !isLast && (
+        {step.optional && step.type !== 'yesno' && step.type !== 'method-story' && !isLast && (
           <button
             onClick={() => { updateField(step.field, ''); nextStep() }}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 border-slate-200 text-slate-400 font-medium hover:bg-slate-50 hover:text-slate-500 transition-colors"
@@ -250,7 +359,7 @@ export function FormStep({ step }: FormStepProps) {
         )}
       </div>
 
-      {step.type !== 'radio' && step.type !== 'yesno' && !step.optional && value.trim() === '' && (
+      {step.type !== 'radio' && step.type !== 'yesno' && step.type !== 'method-story' && !step.optional && value.trim() === '' && (
         <p className="text-xs text-slate-400 -mt-2">
           {step.type === 'textarea'
             ? 'Presiona Shift+Enter para nueva línea'

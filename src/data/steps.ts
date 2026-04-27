@@ -79,10 +79,10 @@ export const STEPS: Step[] = [
   },
   {
     id: 9,
-    question: '¿Tienes algún método o tratamiento único?',
+    question: '¿Tienes un método único o quieres contar tu historia?',
     field: 'uniqueMethod',
-    type: 'yesno',
-    placeholder: 'Ej. Protocolo propio de rehabilitación, técnica mínimamente invasiva...',
+    type: 'method-story',
+    placeholder: 'Ej. Protocolo propio de 3 fases, técnica mínimamente invasiva, combinación de enfoques que desarrollé tras años de práctica...',
   },
   {
     id: 10,
@@ -108,9 +108,9 @@ export const STEPS: Step[] = [
   },
   {
     id: 13,
-    question: '¿Por qué esta oferta es ahora?',
+    question: '¿Existe algún sentido de urgencia?',
     field: 'urgencyReason',
     type: 'yesno',
-    placeholder: 'Ej. Solo 10 lugares disponibles este mes, promoción válida hasta el viernes...',
+    placeholder: 'Ej. Solo 5 lugares disponibles este mes, precio especial válido hasta el 30 de abril, nueva apertura de agenda después de meses llena, temporada alta de la condición que tratas, promoción de lanzamiento que termina pronto, cupo limitado por atención personalizada...',
   },
 ]
