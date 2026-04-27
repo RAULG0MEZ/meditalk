@@ -1,4 +1,4 @@
-import { type KeyboardEvent } from 'react'
+import { useState, useEffect, type KeyboardEvent } from 'react'
 import type { Step } from '../types/form'
 import { useForm } from '../context/FormContext'
 
@@ -14,10 +14,24 @@ export function FormStep({ step }: FormStepProps) {
   const savedValue = (savedFormData?.[step.field] as string) ?? ''
   const isFirst = currentStep === 1
   const isLast = currentStep === totalSteps
-  const canProceed = step.optional ? true : value.trim() !== ''
+
+  const [yesNoChoice, setYesNoChoice] = useState<'si' | 'no' | null>(
+    step.type === 'yesno' && value.trim() !== '' ? 'si' : null
+  )
+
+  useEffect(() => {
+    if (step.type === 'yesno') {
+      setYesNoChoice(value.trim() !== '' ? 'si' : null)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step.id])
+
+  const canProceed = step.type === 'yesno'
+    ? (yesNoChoice === 'no' || (yesNoChoice === 'si' && value.trim() !== ''))
+    : step.optional ? true : value.trim() !== ''
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey && step.type !== 'textarea') {
+    if (e.key === 'Enter' && !e.shiftKey && step.type !== 'textarea' && step.type !== 'yesno') {
       e.preventDefault()
       if (canProceed) isLast ? submitForm() : nextStep()
     }
@@ -33,7 +47,7 @@ export function FormStep({ step }: FormStepProps) {
         )}
         <h2 className="text-2xl font-bold text-slate-800 leading-snug">
           {step.question}
-          {step.optional && (
+          {step.optional && step.type !== 'yesno' && (
             <span className="ml-2 text-sm font-normal text-slate-400">(Opcional)</span>
           )}
         </h2>
@@ -151,6 +165,59 @@ export function FormStep({ step }: FormStepProps) {
         </div>
       )}
 
+      {step.type === 'yesno' && (
+        <div className="flex flex-col gap-4">
+          <div className="flex gap-3">
+            <label
+              className={`
+                flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all flex-1
+                ${yesNoChoice === 'si'
+                  ? 'border-indigo-500 bg-indigo-50'
+                  : 'border-slate-200 hover:border-indigo-200 bg-white'
+                }
+              `}
+            >
+              <input
+                type="radio"
+                name={`${step.field}_yesno`}
+                checked={yesNoChoice === 'si'}
+                onChange={() => setYesNoChoice('si')}
+                className="accent-indigo-600 w-4 h-4"
+              />
+              <span className="font-semibold text-slate-800">Sí</span>
+            </label>
+            <label
+              className={`
+                flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all flex-1
+                ${yesNoChoice === 'no'
+                  ? 'border-slate-400 bg-slate-50'
+                  : 'border-slate-200 hover:border-slate-300 bg-white'
+                }
+              `}
+            >
+              <input
+                type="radio"
+                name={`${step.field}_yesno`}
+                checked={yesNoChoice === 'no'}
+                onChange={() => { setYesNoChoice('no'); updateField(step.field, '') }}
+                className="accent-slate-500 w-4 h-4"
+              />
+              <span className="font-semibold text-slate-800">No</span>
+            </label>
+          </div>
+          {yesNoChoice === 'si' && (
+            <textarea
+              value={value}
+              onChange={e => updateField(step.field, e.target.value)}
+              placeholder={step.placeholder}
+              autoFocus
+              rows={4}
+              className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-indigo-500 focus:outline-none text-slate-800 placeholder-slate-400 text-base transition-colors resize-none"
+            />
+          )}
+        </div>
+      )}
+
       <div className="flex gap-3 pt-2">
         {!isFirst && (
           <button
@@ -173,7 +240,7 @@ export function FormStep({ step }: FormStepProps) {
         >
           {isLast ? 'Generar diálogo →' : 'Continuar →'}
         </button>
-        {step.optional && !isLast && (
+        {step.optional && step.type !== 'yesno' && !isLast && (
           <button
             onClick={() => { updateField(step.field, ''); nextStep() }}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 border-slate-200 text-slate-400 font-medium hover:bg-slate-50 hover:text-slate-500 transition-colors"
@@ -183,7 +250,7 @@ export function FormStep({ step }: FormStepProps) {
         )}
       </div>
 
-      {step.type !== 'radio' && !step.optional && value.trim() === '' && (
+      {step.type !== 'radio' && step.type !== 'yesno' && !step.optional && value.trim() === '' && (
         <p className="text-xs text-slate-400 -mt-2">
           {step.type === 'textarea'
             ? 'Presiona Shift+Enter para nueva línea'
