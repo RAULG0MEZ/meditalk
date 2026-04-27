@@ -212,6 +212,31 @@ function buildPrompt(data: FormData): string {
   const publicationLabel =
     data.publicationType === 'paid_ads' ? 'Anuncios de paga' : 'Contenido orgánico'
 
+  const uniqueMethodLine = (() => {
+    if (!data.uniqueMethod) return ''
+    const isStory = data.uniqueMethod.startsWith('HISTORIA:')
+    const text = data.uniqueMethod.replace(/^(MÉTODO:|HISTORIA:)\s*/, '')
+    return `- ${isStory ? 'Mi historia profesional (viaje del héroe)' : 'Método o tratamiento único'}: ${text}`
+  })()
+
+  const datosAdicionalesLines = [
+    data.uniqueness ? `- Lo que me hace único: ${data.uniqueness}` : '',
+    uniqueMethodLine,
+    data.awardsTestimonials ? `- Premios, logros y testimonios: ${data.awardsTestimonials}` : '',
+  ].filter(s => s !== '')
+
+  const datosAdicionales = datosAdicionalesLines.length > 0
+    ? `Datos adicionales:\n${datosAdicionalesLines.join('\n')}`
+    : ''
+
+  const urgencyLine = data.urgencyReason
+    ? `Escasez/Urgencia: ${data.urgencyReason}`
+    : 'Escasez/Urgencia: No aplica, NO menciones ni inventes urgencia.'
+
+  const urgencyPaso9 = data.urgencyReason
+    ? `PASO 9. Crear Urgencia: Concluye con una invitación a actuar de inmediato usando esta escasez/urgencia real: "${data.urgencyReason}".`
+    : 'PASO 9. Crear Urgencia: No hay urgencia específica; omite este paso y cierra de forma natural.'
+
   return `Tu trabajo será hacer un copy brutalmente alarmante y EMOCIONAL EXAGERADO PERO REAL y tu tarea es únicamente pasarme la respuesta, nada más, a continuación te compartiré las instrucciones pero quiero que recuerdes que me tienes que pasar simplemente el copy final pulido.
 
 Objetivo General:
@@ -226,13 +251,10 @@ Especialidad: ${data.specialty}
 A quién y a qué los ayudas: ${data.targetAudience}
 Localidad: ${data.location}
 Hospital: ${data.clinicName}
-Total de pacientes atendidos: ${data.patientCount}
-Datos adicionales:
-${data.uniqueness}
-${data.uniqueMethod}
-${data.awardsTestimonials}
+${data.patientCount ? `Total de pacientes atendidos: ${data.patientCount}` : ''}
+${datosAdicionales}
 Oferta: Estás ofreciendo ${data.offering}
-Escasez/Urgencia: ${data.urgencyReason}
+${urgencyLine}
 Eres el mejor copywriter de la historia, al nivel de maestros de noticias negativas televisivas y medios globales.
 Eres un experto en crear mensajes que capturan brutalmente la atención en las redes sociales de manera ultraespecífica y persuasiva.
 Tienes un profundo entendimiento de la psicología humana y sabes cómo conectar emocionalmente con el público objetivo específico.
@@ -303,7 +325,7 @@ PASO 5. Educar e Inspirar: Aprovecha este espacio para educar al cliente, hacerl
 PASO 6. Crear Expectativa: Genera expectativa anunciando los 3 consejitos enfatizando que el 3ero es el más importante. Empieza a contar las primeras 2.
 PASO 7. La Última Recomendación - Actuar: El consejo número 3 es lo que estás promocionando, presentándose como la solución ideal.
 PASO 8. Incentivar la Oferta: Refuerza la propuesta destacando los beneficios significativos y genuinos.
-PASO 9. Crear Urgencia: Concluye con una invitación a actuar de inmediato usando escasez o urgencia. Esto solo si se proporcionó: ${data.urgencyReason}.
+${urgencyPaso9}
 
 PAS (Problema, Agitación, Solución):
 PASO 1. Identificar el Problema: Comienza dirigiéndote al cliente ideal mencionando el problema de ${data.targetAudience} y cómo afecta a personas de ${data.location}.

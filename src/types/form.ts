@@ -20,7 +20,7 @@ export interface Step {
   id: number
   question: string
   field: keyof FormData
-  type: 'radio' | 'text' | 'textarea' | 'yesno'
+  type: 'radio' | 'text' | 'textarea' | 'yesno' | 'method-story'
   placeholder?: string
   optional?: boolean
   important?: boolean
