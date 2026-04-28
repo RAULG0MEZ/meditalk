@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 import type { FormData } from '../types/form'
 import { saveFormData, loadFormData, clearFormData, hasCompletedData } from '../utils/localStorage'
+import { saveDialogue, updateDialogueResult } from '../utils/dialogueStorage'
 
 interface FormContextType {
   formData: FormData
@@ -12,6 +13,7 @@ interface FormContextType {
   isModifying: boolean
   result: string | null
   error: string | null
+  currentDialogueId: string | null
   updateField: (field: keyof FormData, value: string) => void
   nextStep: () => void
   prevStep: () => void
@@ -19,6 +21,7 @@ interface FormContextType {
   submitForm: () => Promise<void>
   modifyResult: (instruction: string) => Promise<void>
   resetForm: () => void
+  loadSavedDialogue: (data: FormData, savedResult: string, dialogueId: string) => void
 }
 
 const initialFormData: FormData = {
@@ -48,6 +51,7 @@ export function FormProvider({ children }: { children: ReactNode }) {
   const [isModifying, setIsModifying] = useState(false)
   const [result, setResult] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [currentDialogueId, setCurrentDialogueId] = useState<string | null>(null)
 
   const totalSteps = 13
 
@@ -104,6 +108,8 @@ export function FormProvider({ children }: { children: ReactNode }) {
       setLoadingStep(4)
       const formatted = await callAnthropic(apiKey, buildFormatPrompt(colloquial))
 
+      const saved = saveDialogue(formData, formatted)
+      setCurrentDialogueId(saved.id)
       setResult(formatted)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ocurrió un error inesperado')
@@ -120,7 +126,17 @@ export function FormProvider({ children }: { children: ReactNode }) {
     setCurrentStep(1)
     setResult(null)
     setError(null)
+    setCurrentDialogueId(null)
     clearFormData()
+  }
+
+  const loadSavedDialogue = (data: FormData, savedResult: string, dialogueId: string) => {
+    setFormData(data)
+    setResult(savedResult)
+    setCurrentDialogueId(dialogueId)
+    setCurrentStep(1)
+    setError(null)
+    setLoadingStep(0)
   }
 
   const modifyResult = async (instruction: string) => {
@@ -143,6 +159,7 @@ ${instruction}
 Devuelve únicamente el copy modificado, sin explicaciones adicionales.`
 
       const modified = await callAnthropic(apiKey, prompt)
+      if (currentDialogueId) updateDialogueResult(currentDialogueId, modified)
       setResult(modified)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ocurrió un error inesperado')
@@ -163,6 +180,7 @@ Devuelve únicamente el copy modificado, sin explicaciones adicionales.`
         isModifying,
         result,
         error,
+        currentDialogueId,
         updateField,
         nextStep,
         prevStep,
@@ -170,6 +188,7 @@ Devuelve únicamente el copy modificado, sin explicaciones adicionales.`
         submitForm,
         modifyResult,
         resetForm,
+        loadSavedDialogue,
       }}
     >
       {children}
