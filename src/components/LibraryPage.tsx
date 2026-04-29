@@ -36,7 +36,7 @@ export function LibraryPage({ onCreateNew, onOpenDialogue, onGoHome }: LibraryPa
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 py-10 px-4">
+    <div className="py-10 px-4">
       <div className="max-w-2xl mx-auto flex flex-col gap-8">
 
         {/* Header */}

@@ -23,7 +23,7 @@ function FormContent({ onGoToLibrary, onGoHome }: FormContentProps) {
   const currentStepData = STEPS[currentStep - 1]
 
   return (
-    <div className="bg-gradient-to-br from-slate-50 to-indigo-50 py-10 px-4">
+    <div className="py-10 px-4">
       <div className="max-w-4xl mx-auto">
         <Header onGoHome={onGoHome} />
 
