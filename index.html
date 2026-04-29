@@ -5,31 +5,6 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>meditalk</title>
-    <script>
-      (function () {
-        if (window.self === window.top) return;
-        function isAllowed(origin) {
-          try {
-            var h = new URL(origin).hostname;
-            return h === 'raulgomez.com.mx' || h.endsWith('.raulgomez.com.mx') ||
-                   h === 'gohighlevel.com' || h.endsWith('.gohighlevel.com');
-          } catch (e) { return true; }
-        }
-        var blocked = false;
-        if (window.location.ancestorOrigins && window.location.ancestorOrigins.length) {
-          blocked = !Array.from(window.location.ancestorOrigins).every(isAllowed);
-        } else if (document.referrer) {
-          blocked = !isAllowed(document.referrer);
-        }
-        if (blocked) {
-          document.documentElement.innerHTML =
-            '<body style="margin:0;display:flex;align-items:center;justify-content:center;' +
-            'height:100vh;font-family:sans-serif;background:#f8fafc;">' +
-            '<p style="color:#64748b;font-size:14px;">Este contenido no puede embeberse en este dominio.</p>' +
-            '</body>';
-        }
-      })();
-    </script>
   </head>
   <body>
     <div id="root"></div>
