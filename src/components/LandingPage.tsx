@@ -14,7 +14,7 @@ export function LandingPage({ onCreateNew, onOpenLibrary }: LandingPageProps) {
   }, [])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 flex flex-col items-center justify-center px-4 py-16">
+    <div className="min-h-full bg-gradient-to-br from-slate-50 to-indigo-50 flex flex-col items-center justify-center px-4 py-16">
       <div className="w-full max-w-lg flex flex-col items-center gap-10">
 
         {/* Logo */}
