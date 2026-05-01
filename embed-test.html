@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MediTalk — Prueba de Embed</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #e5e7eb;
+      padding: 40px 24px;
+    }
+    .page {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    h1 { font-size: 1.1rem; color: #374151; margin-bottom: 4px; }
+    p { font-size: 0.85rem; color: #6b7280; margin: 0 0 16px; }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.12);
+    }
+    .label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: #9ca3af;
+      margin-bottom: 8px;
+    }
+    iframe {
+      display: block;
+      width: 100%;
+      height: 750px;
+      border: none;
+      border-radius: 8px;
+      box-shadow: 0 0 0 1px rgba(0,0,0,.08);
+    }
+    .checks {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .check {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 0.82rem;
+      color: #374151;
+    }
+    .check strong { display: block; color: #111827; margin-bottom: 2px; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <h1>MediTalk — Prueba de Embed</h1>
+    <p>Simulación exacta del código iframe que se usa en el portal (height="750").</p>
+
+    <div class="card">
+      <div class="label">iframe embed (750 px)</div>
+      <iframe
+        src="https://raulg0mez.github.io/meditalk/"
+        allowfullscreen
+      ></iframe>
+    </div>
+
+    <div class="checks">
+      <div class="check">
+        <strong>Gradiente de fondo</strong>
+        Debe cubrir los 750 px completos del iframe, sin cortes blancos abajo.
+      </div>
+      <div class="check">
+        <strong>Contenido largo (resultados)</strong>
+        Si el contenido supera 750 px debe hacer scroll dentro del iframe, no cortarse.
+      </div>
+      <div class="check">
+        <strong>Landing page</strong>
+        El logo y los botones deben verse centrados con el gradiente de fondo completo.
+      </div>
+      <div class="check">
+        <strong>Formulario paso a paso</strong>
+        Cada paso debe caber o hacer scroll. Los botones fijos deben verse dentro del iframe.
+      </div>
+    </div>
+  </div>
+</body>
+</html>
